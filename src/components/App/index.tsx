@@ -3,12 +3,13 @@ import Main from "../Main";
 import Footer from "../Footer";
 
 const App = function() {
-  return <div>
-    <Header />
-    <h1>App</h1>
-    <Main />
-    <Footer />
-  </div>;
+  return (
+    <>
+      <Header />
+      <Main />
+      <Footer />
+    </>
+  );
 }
 
 export default App;

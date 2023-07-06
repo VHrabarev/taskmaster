@@ -12,8 +12,17 @@ const Header = function() {
                         <Typography 
                             variant='h6'
                             noWrap
-                            children="Master Tasks"
+                            children="Taskmaster"
                         />
+                    </Link>
+                    <Link to="/profile">
+                        <Typography>profile</Typography>
+                    </Link>
+                    <Link to="/registration">
+                        <Typography>registration</Typography>
+                    </Link>
+                    <Link to="/login">
+                        <Typography>login</Typography>
                     </Link>
                 </Toolbar>
             </Container>
