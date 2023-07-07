@@ -1,21 +1,30 @@
 import { Box, Typography, TextField, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton, Checkbox, Button, Divider } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { visuallyHidden } from '@mui/utils';
-import React, { FormEvent } from "react";
+import React, { FormEvent, useState, MouseEvent, useRef } from "react";
 import { Link } from 'react-router-dom';
+import { useAppDispatch } from '../../hook';
+import { userCreate } from '../../store/reducers/registrationReducer';
 
 const Registration: React.FC = function() {
-    const [showPassword, setShowPassword] = React.useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const fullName = useRef<HTMLInputElement>();
+    const email = useRef<HTMLInputElement>();
+    const password = useRef<HTMLInputElement>();
+    const dispatch = useAppDispatch();
 
     const onSubmitForm = function(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        if(email.current?.value && password.current?.value) {
+            dispatch(userCreate({email: email.current?.value, password: password.current?.value}));
+        };
     };
 
     const handleClickShowPassword = function() {
         setShowPassword((show) => !show)
     };
 
-    const handleMouseDownPassword = function(event: React.MouseEvent<HTMLButtonElement>) {
+    const handleMouseDownPassword = function(event: MouseEvent<HTMLButtonElement>) {
       event.preventDefault();
     };
 
@@ -45,8 +54,8 @@ const Registration: React.FC = function() {
                 sx={{ display: "flex", flexDirection: "column", textAlign: "center", maxWidth: 350, margin: "0 auto" }}
             >
                 <Typography component="h3" variant='h4' sx={{ mb: 2 }}>Create your account</Typography>
-                <TextField label="Full Name" variant="outlined" sx={{ mb: 2 }} />
-                <TextField label="Email Address" variant="outlined" sx={{ mb: 2 }} type='email' />
+                <TextField label="Full Name" variant="outlined" sx={{ mb: 2 }} inputRef={fullName} />
+                <TextField label="Email Address" variant="outlined" sx={{ mb: 2 }} inputRef={email} type='email' />
                 <FormControl variant="outlined" sx={{ mb: 1 }}>
                     <InputLabel htmlFor="password">Password</InputLabel>
                     <OutlinedInput
@@ -54,6 +63,7 @@ const Registration: React.FC = function() {
                         type={showPassword ? 'text' : 'password'}
                         endAdornment={passwordEndAdornment}
                         label="Password"
+                        inputRef={password}
                     />
                 </FormControl>
                 <Box sx={{ display: "flex", textAlign: "left", alignItems: "flex-start", mb: 2 }}>
