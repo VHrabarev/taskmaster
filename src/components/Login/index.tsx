@@ -1,7 +1,6 @@
-import { Box, Typography, TextField, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton } from '@mui/material';
+import { Box, Typography, TextField, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton, Button, Divider } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
-import Visibility from '@mui/icons-material/Visibility';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import React, { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -12,9 +11,11 @@ const Login: React.FC = function() {
         event.preventDefault();
     };
 
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleClickShowPassword = function() {
+        setShowPassword((show) => !show)
+    };
 
-    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleMouseDownPassword = function(event: React.MouseEvent<HTMLButtonElement>) {
       event.preventDefault();
     };
 
@@ -50,9 +51,20 @@ const Login: React.FC = function() {
                         label="Password"
                     />
                 </FormControl>
-                <Link to='forgot-password' style={{ color: "inherit", textDecoration: "none" }}>
-                    <Typography>Forgot Password?</Typography>
+                <Link to="forgot-password" style={{ color: "inherit", textDecoration: "none", textAlign: "right", marginBottom: 20 }}>
+                    <Typography className="opacityBrightly">Forgot Password?</Typography>
                 </Link>
+                <Button variant="contained" type="submit" sx={{ mb: 2 }}>Log In</Button>
+                <Divider role="presentation" sx={{ mb: 2 }}>
+                    <Typography sx={{ opacity: 0.6 }}>Or continue with</Typography>
+                </Divider>
+                <Button variant="outlined" sx={{ mb: 2 }}>Google</Button>
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <Typography variant='body2' sx={{ opacity: 0.6, mr: 1 }}>Don’t have an account?</Typography>
+                    <Link to="/registration" style={{ color: "#1976d2", textDecoration: "none" }}>
+                        <Typography variant='body2' className='opacityDimly'>Sign Up</Typography>
+                    </Link>
+                </Box>
             </Box>
         </Box>
     );
