@@ -78,9 +78,9 @@ const userSlice = createSlice({
             const auth = getAuth(firebaseApp);
             onAuthStateChanged(auth, (user) => {
                 if(user) {
-                    console.log(user);
+                    
                 } else {
-                    console.log("ytpfkjubyty");
+                    
                 };
             });
         },
