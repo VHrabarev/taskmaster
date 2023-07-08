@@ -4,7 +4,7 @@ import { visuallyHidden } from '@mui/utils';
 import React, { FormEvent, useState, MouseEvent, useRef } from "react";
 import { Link } from 'react-router-dom';
 import { useAppDispatch } from '../../hook';
-import { userCreate } from '../../store/reducers/registrationReducer';
+import { userCreate } from '../../store/reducers/userReducer';
 
 const Registration: React.FC = function() {
     const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +17,8 @@ const Registration: React.FC = function() {
         event.preventDefault();
         if(email.current?.value && password.current?.value) {
             dispatch(userCreate({email: email.current?.value, password: password.current?.value}));
+        } else {
+            console.log("Нету данных");
         };
     };
 

@@ -1,14 +1,24 @@
 import { Box, Typography, TextField, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton, Button, Divider } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import React, { FormEvent } from 'react';
+import React, { FormEvent, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useAppDispatch } from '../../hook';
+import { userLogin } from '../../store/reducers/userReducer';
 
 const Login: React.FC = function() {
-    const [showPassword, setShowPassword] = React.useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const dispatch = useAppDispatch();
+    const email = useRef<HTMLInputElement>();
+    const password = useRef<HTMLInputElement>();
 
     const onSubmitForm = function(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
+        if(email.current?.value && password.current?.value) {
+            dispatch(userLogin({email: email.current?.value, password: password.current?.value}));
+        } else {
+            console.log("Нет данных");
+        };
     };
 
     const handleClickShowPassword = function() {
@@ -41,7 +51,7 @@ const Login: React.FC = function() {
                 sx={{ display: "flex", flexDirection: "column", textAlign: "center", maxWidth: 350, margin: "0 auto" }}
             >
                 <Typography component="h3" variant='h4' sx={{ mb: 2 }}>Welcome Back!</Typography>
-                <TextField label="Login" variant="outlined" sx={{ mb: 2 }} />
+                <TextField label="Email" variant="outlined" sx={{ mb: 2 }} type='email' inputRef={email} />
                 <FormControl variant="outlined" sx={{ mb: 1 }}>
                     <InputLabel htmlFor="password">Password</InputLabel>
                     <OutlinedInput
@@ -49,6 +59,7 @@ const Login: React.FC = function() {
                         type={showPassword ? 'text' : 'password'}
                         endAdornment={passwordEndAdornment}
                         label="Password"
+                        inputRef={password}
                     />
                 </FormControl>
                 <Link to="forgot-password" style={{ color: "inherit", textDecoration: "none", textAlign: "right", marginBottom: 20 }}>
