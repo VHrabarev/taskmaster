@@ -43,15 +43,15 @@ const Login: React.FC = function() {
     );
 
     return (
-        <Box component="section">
+        <Box component="section" sx={{ textAlign: "center", maxWidth: 350, margin: "0 auto", padding: "20px 40px", backgroundColor: "#fff", borderRadius: 3, boxShadow: "0 0 5px #7b7171" }}>
             <Typography component="h2" sx={visuallyHidden}>Login</Typography>
             <Box 
                 component="form"
                 onSubmit={onSubmitForm}
-                sx={{ display: "flex", flexDirection: "column", textAlign: "center", maxWidth: 350, margin: "0 auto" }}
+                sx={{ display: "flex", flexDirection: "column" }}
             >
                 <Typography component="h3" variant='h4' sx={{ mb: 2 }}>Welcome Back!</Typography>
-                <TextField label="Email" variant="outlined" sx={{ mb: 2 }} type='email' inputRef={email} />
+                <TextField label="Email" variant="outlined" sx={{ mb: 2 }} type='email' inputRef={email} autoFocus />
                 <FormControl variant="outlined" sx={{ mb: 1 }}>
                     <InputLabel htmlFor="password">Password</InputLabel>
                     <OutlinedInput

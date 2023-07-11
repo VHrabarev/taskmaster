@@ -48,15 +48,15 @@ const Registration: React.FC = function() {
     );
 
     return (
-        <Box component="section">
+        <Box component="section" sx={{ textAlign: "center", maxWidth: 350, margin: "0 auto", padding: "20px 40px", backgroundColor: "#fff", borderRadius: 3, boxShadow: "0 0 5px #7b7171" }}>
             <Typography component="h2" sx={visuallyHidden}>Registration</Typography>
             <Box
                 component="form"
                 onSubmit={onSubmitForm}
-                sx={{ display: "flex", flexDirection: "column", textAlign: "center", maxWidth: 350, margin: "0 auto" }}
+                sx={{ display: "flex", flexDirection: "column" }}
             >
                 <Typography component="h3" variant='h4' sx={{ mb: 2 }}>Create your account</Typography>
-                <TextField label="Full Name" variant="outlined" sx={{ mb: 2 }} inputRef={fullName} />
+                <TextField label="Full Name" variant="outlined" sx={{ mb: 2 }} inputRef={fullName} autoFocus />
                 <TextField label="Email Address" variant="outlined" sx={{ mb: 2 }} inputRef={email} type='email' />
                 <FormControl variant="outlined" sx={{ mb: 1 }}>
                     <InputLabel htmlFor="password">Password</InputLabel>

@@ -1,6 +1,7 @@
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, signOut, onAuthStateChanged  } from "firebase/auth";
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, signOut } from "firebase/auth";
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import firebaseApp from '../../api/firebase';
+import store from "..";
 
 interface userData {
     email: string;
@@ -42,18 +43,24 @@ const userLogout = createAsyncThunk(
     },
 );
 
+interface userInfo {
+    loginStatus: boolean,
+    fullName: string | null,
+    email: string | null,
+    phone: string | null,
+    avatarUrl: string | null,
+};
+
 interface registrationState {
     userRegistration: {
         registrationError: boolean,
-        registrationErrorMessage: string,
+        registrationErrorMessage: string | undefined,
     },
     userLogin: {
         loginError: boolean,
-        loginErrorMessage: string,
+        loginErrorMessage: string | undefined,
     },
-    userInfo: {
-        loginStatus: boolean,
-    }
+    userInfo: userInfo,
 };
 
 const initialState: registrationState = {
@@ -67,22 +74,24 @@ const initialState: registrationState = {
     },
     userInfo: {
         loginStatus: false,
-    }
+        fullName: null,
+        email: null,
+        phone: null,
+        avatarUrl: null,
+    },
 };
 
 const userSlice = createSlice({
     name: "user",
     initialState,
     reducers: {
-        checkUserStatus: (store) => {
-            const auth = getAuth(firebaseApp);
-            onAuthStateChanged(auth, (user) => {
-                if(user) {
-                    
-                } else {
-                    
-                };
-            });
+        checkUserStatus: (state, action: PayloadAction<userInfo>) => {
+            const { loginStatus, fullName, email, phone, avatarUrl } = action.payload;
+            state.userInfo.loginStatus = loginStatus;
+            state.userInfo.fullName = fullName;
+            state.userInfo.email = email;
+            state.userInfo.phone = phone;
+            state.userInfo.avatarUrl = avatarUrl;
         },
     },
     extraReducers: (builder) => {
@@ -90,13 +99,35 @@ const userSlice = createSlice({
             store.userRegistration.registrationError = false;
             store.userRegistration.registrationErrorMessage = "";
         });
+        builder.addCase(userCreate.pending, (store) => {
+            
+        });
+        builder.addCase(userCreate.rejected, (store, action) => {
+            store.userRegistration.registrationError = true;
+            store.userRegistration.registrationErrorMessage = action.error.message;
+        });
         builder.addCase(userLogin.fulfilled, (store, action) => {
             store.userLogin.loginError = false;
             store.userLogin.loginErrorMessage = "";
             store.userInfo.loginStatus = true;
+            store.userInfo.fullName = action.payload.displayName;
+            store.userInfo.email = action.payload.email;
+            store.userInfo.phone = action.payload.phoneNumber;
+            store.userInfo.avatarUrl = action.payload.photoURL;
+        });
+        builder.addCase(userLogin.pending, (store) => {
+            
+        });
+        builder.addCase(userLogin.rejected, (store, action) => {
+            store.userLogin.loginError = true;
+            store.userLogin.loginErrorMessage = action.error.message;
         });
         builder.addCase(userLogout.fulfilled, (store) => {
             store.userInfo.loginStatus = false;
+            store.userInfo.fullName = null;
+            store.userInfo.email = null;
+            store.userInfo.phone = null;
+            store.userInfo.avatarUrl = null;
         });
     },
 });
