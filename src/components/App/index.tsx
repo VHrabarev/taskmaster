@@ -30,7 +30,6 @@ const App: React.FC = function() {
       };
     });
     window.addEventListener("resize", () => handleResize);
-    console.log("Вызов внутри юзэффект")
     return window.removeEventListener("resize", () => handleResize);
   } ,[]);
 

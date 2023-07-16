@@ -95,7 +95,7 @@ const userSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
-        builder.addCase(userCreate.fulfilled, (store, action) => {
+        builder.addCase(userCreate.fulfilled, (store) => {
             store.userRegistration.registrationError = false;
             store.userRegistration.registrationErrorMessage = "";
         });
@@ -104,23 +104,18 @@ const userSlice = createSlice({
         });
         builder.addCase(userCreate.rejected, (store, action) => {
             store.userRegistration.registrationError = true;
-            store.userRegistration.registrationErrorMessage = action.error.message;
+            store.userRegistration.registrationErrorMessage = action.error.code;
         });
-        builder.addCase(userLogin.fulfilled, (store, action) => {
+        builder.addCase(userLogin.fulfilled, (store) => {
             store.userLogin.loginError = false;
             store.userLogin.loginErrorMessage = "";
-            store.userInfo.loginStatus = true;
-            store.userInfo.fullName = action.payload.displayName;
-            store.userInfo.email = action.payload.email;
-            store.userInfo.phone = action.payload.phoneNumber;
-            store.userInfo.avatarUrl = action.payload.photoURL;
         });
         builder.addCase(userLogin.pending, (store) => {
             
         });
         builder.addCase(userLogin.rejected, (store, action) => {
             store.userLogin.loginError = true;
-            store.userLogin.loginErrorMessage = action.error.message;
+            store.userLogin.loginErrorMessage = action.error.code;
         });
         builder.addCase(userLogout.fulfilled, (store) => {
             store.userInfo.loginStatus = false;
