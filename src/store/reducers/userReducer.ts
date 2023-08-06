@@ -1,7 +1,6 @@
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, signOut } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, signOut, updateProfile, updateEmail, updatePhoneNumber } from "firebase/auth";
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import firebaseApp from '../../api/firebase';
-import store from "..";
 
 interface userData {
     email: string;
@@ -35,6 +34,29 @@ const userLogin = createAsyncThunk(
     },
 );
 
+interface userInfo {
+    loginStatus: boolean,
+    fullName: string | null,
+    email: string | null,
+    avatarUrl: string | null,
+};
+
+const userUpdateProfile = createAsyncThunk(
+    "user/userUpdateProfile",
+    async ({fullName, email, avatarUrl, loginStatus}: userInfo, thunkAPI) => {
+        try {
+            const auth = getAuth(firebaseApp);
+            if(auth.currentUser && email) {
+                await updateProfile(auth.currentUser, {displayName: fullName, photoURL: avatarUrl});
+                await updateEmail(auth.currentUser, email);
+                thunkAPI.dispatch(checkUserStatus({loginStatus, fullName, email, avatarUrl}));
+            }
+        } catch (error) {
+            return thunkAPI.rejectWithValue(error);
+        };
+    },
+);
+
 const userLogout = createAsyncThunk(
     "user/userLogout",
     async () => {
@@ -42,14 +64,6 @@ const userLogout = createAsyncThunk(
         await signOut(auth);
     },
 );
-
-interface userInfo {
-    loginStatus: boolean,
-    fullName: string | null,
-    email: string | null,
-    phone: string | null,
-    avatarUrl: string | null,
-};
 
 interface registrationState {
     userRegistration: {
@@ -61,6 +75,10 @@ interface registrationState {
         loginErrorMessage: string | undefined,
     },
     userInfo: userInfo,
+    userUpdateProfile: {
+        updateError: boolean,
+        updateErrorMessage: string | undefined,
+    },
 };
 
 const initialState: registrationState = {
@@ -76,8 +94,11 @@ const initialState: registrationState = {
         loginStatus: false,
         fullName: null,
         email: null,
-        phone: null,
         avatarUrl: null,
+    },
+    userUpdateProfile: {
+        updateError: false,
+        updateErrorMessage: ""
     },
 };
 
@@ -86,11 +107,10 @@ const userSlice = createSlice({
     initialState,
     reducers: {
         checkUserStatus: (state, action: PayloadAction<userInfo>) => {
-            const { loginStatus, fullName, email, phone, avatarUrl } = action.payload;
+            const { loginStatus, fullName, email, avatarUrl } = action.payload;
             state.userInfo.loginStatus = loginStatus;
             state.userInfo.fullName = fullName;
             state.userInfo.email = email;
-            state.userInfo.phone = phone;
             state.userInfo.avatarUrl = avatarUrl;
         },
     },
@@ -121,8 +141,18 @@ const userSlice = createSlice({
             store.userInfo.loginStatus = false;
             store.userInfo.fullName = null;
             store.userInfo.email = null;
-            store.userInfo.phone = null;
             store.userInfo.avatarUrl = null;
+        });
+        builder.addCase(userUpdateProfile.fulfilled, (store) => {
+            store.userUpdateProfile.updateError = false;
+            store.userUpdateProfile.updateErrorMessage = "";
+        });
+        builder.addCase(userUpdateProfile.pending, (store) => {
+            
+        });
+        builder.addCase(userUpdateProfile.rejected, (store, action) => {
+            store.userUpdateProfile.updateError = true;
+            store.userUpdateProfile.updateErrorMessage = action.error.code;
         });
     },
 });
@@ -130,4 +160,4 @@ const userSlice = createSlice({
 const {checkUserStatus} = userSlice.actions;
 
 export default userSlice.reducer;
-export {userCreate, userLogin, checkUserStatus, userLogout};
+export {userCreate, userLogin, checkUserStatus, userLogout, userUpdateProfile};

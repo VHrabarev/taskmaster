@@ -24,7 +24,6 @@ const App: React.FC = function() {
           loginStatus: true,
           fullName: user.displayName,
           email: user.email,
-          phone: user.phoneNumber,
           avatarUrl: user.photoURL,
         }))
       };
