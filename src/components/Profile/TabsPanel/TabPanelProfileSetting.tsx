@@ -4,13 +4,7 @@ import React, { useState, SyntheticEvent, FormEvent } from "react";
 import { useAppSelector, useAppDispatch } from "../../../hook";
 import { userUpdateProfile } from "../../../store/reducers/userReducer";
 
-interface TabPanelProfileSettingProps {
-    value: number,
-    index: number
-};
-
-const TabPanelProfileSetting: React.FC<TabPanelProfileSettingProps> = function(props) {
-    const {value, index} = props;
+const TabPanelProfileSetting: React.FC = function() {
     const [profileValue, setProfileValue] = useState(0);
     const { userInfo } = useAppSelector(store => store.user);
     const [user, setUser] = useState(userInfo);
@@ -26,7 +20,7 @@ const TabPanelProfileSetting: React.FC<TabPanelProfileSettingProps> = function(p
     };
 
     return (
-        <Box component="section" hidden={value !== index}>
+        <Box component="section">
             <Typography component="h3" sx={visuallyHidden}>Profile setting</Typography>
             <Tabs value={profileValue} onChange={handleChange} aria-label="Profile tabs" sx={{ mb: 2 }}>
                 <Tab label="Account Setting" />

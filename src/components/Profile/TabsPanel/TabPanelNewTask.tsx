@@ -1,15 +1,9 @@
 import { Box, Typography } from "@mui/material";
 
-interface TabPanelNewTaskProps {
-    value: number,
-    index: number
-};
-
-const TabPanelNewTask: React.FC<TabPanelNewTaskProps> = function(props) {
-    const {value, index} = props;
+const TabPanelNewTask: React.FC = function() {
 
     return (
-        <Box component="section" hidden={value !== index}>
+        <Box component="section">
             <Typography component="h3">New task</Typography>
         </Box>
     );

@@ -1,16 +1,16 @@
 import { Box, Typography } from "@mui/material";
+import { LocalizationProvider, DateCalendar  }  from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
-interface TabPanelCalenderProps {
-    value: number,
-    index: number
-};
-
-const TabPanelCalender: React.FC<TabPanelCalenderProps> = function(props) {
-    const {value, index} = props;
+const TabPanelCalender: React.FC = function() {
 
     return (
-        <Box component="section" hidden={value !== index}>
-            <Typography component="h3">Calendar</Typography>
+        <Box component="section" sx={{ display: "flex", pt: 2 }}>
+            <Typography component="h3" hidden={true}>Calendar</Typography>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DateCalendar sx={{ m: 0 }} />
+            </LocalizationProvider>
+            
         </Box>
     );
 };

@@ -19,6 +19,14 @@ const Profile: React.FC = function() {
         setValue(newValue);
     };
 
+    const showTabPanel = function(index: number) {
+        switch (index) {
+            case 0: return <TabPanelNewTask />;
+            case 1: return <TabPanelCalender />;
+            default: return <TabPanelProfileSetting />;
+        };
+    };
+
     return (
         <Box component="section" sx={{ display: "flex", flexWrap: "nowrap" }}>
             <Typography component="h2" sx={visuallyHidden}>Profile</Typography>
@@ -38,9 +46,7 @@ const Profile: React.FC = function() {
                 <Button startIcon={<LogoutIcon />} onClick={() => dispatch(userLogout())}>Log out</Button>
             </Box>
             <Box sx={{ flexGrow: 1, backgroundColor: "#fff", borderRadius: 3, boxShadow: "0 0 5px #7b7171" }}>
-                <TabPanelNewTask value={value} index={0} />
-                <TabPanelCalender value={value} index={1} />
-                <TabPanelProfileSetting value={value} index={2} />
+                {showTabPanel(value)}
             </Box>
         </Box>
     );
