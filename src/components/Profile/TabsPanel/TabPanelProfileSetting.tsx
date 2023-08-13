@@ -16,7 +16,15 @@ const TabPanelProfileSetting: React.FC = function() {
 
     const onSubmitUserInfoForm = function(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        dispatch(userUpdateProfile({fullName: user.fullName, email: user.email, avatarUrl: user.avatarUrl, loginStatus: true}));
+        dispatch(userUpdateProfile(
+            {
+                fullName: user.fullName,
+                email: user.email,
+                avatarUrl: user.avatarUrl,
+                loginStatus: user.loginStatus,
+                userUID: user.userUID
+            }
+        ));
     };
 
     return (

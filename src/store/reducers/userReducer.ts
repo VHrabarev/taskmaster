@@ -39,17 +39,18 @@ interface userInfo {
     fullName: string | null,
     email: string | null,
     avatarUrl: string | null,
+    userUID: string,
 };
 
 const userUpdateProfile = createAsyncThunk(
     "user/userUpdateProfile",
-    async ({fullName, email, avatarUrl, loginStatus}: userInfo, thunkAPI) => {
+    async ({fullName, email, avatarUrl, loginStatus, userUID}: userInfo, thunkAPI) => {
         try {
             const auth = getAuth(firebaseApp);
             if(auth.currentUser && email) {
                 await updateProfile(auth.currentUser, {displayName: fullName, photoURL: avatarUrl});
                 await updateEmail(auth.currentUser, email);
-                thunkAPI.dispatch(checkUserStatus({loginStatus, fullName, email, avatarUrl}));
+                thunkAPI.dispatch(checkUserStatus({loginStatus, fullName, email, avatarUrl, userUID}));
             }
         } catch (error) {
             return thunkAPI.rejectWithValue(error);
@@ -95,6 +96,7 @@ const initialState: registrationState = {
         fullName: null,
         email: null,
         avatarUrl: null,
+        userUID: "",
     },
     userUpdateProfile: {
         updateError: false,
@@ -107,11 +109,12 @@ const userSlice = createSlice({
     initialState,
     reducers: {
         checkUserStatus: (state, action: PayloadAction<userInfo>) => {
-            const { loginStatus, fullName, email, avatarUrl } = action.payload;
+            const { loginStatus, fullName, email, avatarUrl, userUID } = action.payload;
             state.userInfo.loginStatus = loginStatus;
             state.userInfo.fullName = fullName;
             state.userInfo.email = email;
             state.userInfo.avatarUrl = avatarUrl;
+            state.userInfo.userUID = userUID;
         },
     },
     extraReducers: (builder) => {
