@@ -1,4 +1,4 @@
-import { Box, Typography, Grid, Card, CardHeader, CardContent, CardActions, IconButton, Badge } from "@mui/material";
+import { Box, Typography, Grid, Card, CardHeader, CardContent, CardActions, IconButton, Badge, Button } from "@mui/material";
 import { LocalizationProvider, DateCalendar }  from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { PickersDay, PickersDayProps } from '@mui/x-date-pickers/PickersDay';
@@ -7,8 +7,17 @@ import React, { useState, useEffect } from "react";
 import dayjs, { Dayjs } from 'dayjs';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+interface taskListType {
+    [key: string]: {
+        title: string,
+        details: string,
+        timespan: number,
+    },
+}
+
 const TabPanelCalender: React.FC = function() {
     const [date, setDate] = useState<Dayjs | null>(dayjs());
+    const [isShowAllTask, setIsShowAllTask] = useState<boolean>();
     const taskList = useAppSelector(store => store.task.taskList);
     const [highlightedDays, setHighlightedDays] = useState<number[]>([]);
 
@@ -39,6 +48,24 @@ const TabPanelCalender: React.FC = function() {
         setHighlightedDays(Array.from(new Set(newHighlightedDays)));
     };
 
+    const showTaskListByDay = function() {
+        let newTaskList: taskListType = {};
+        Object.entries(taskList).map(([key, value]) => {
+            const taskDay = dayjs.unix(value.timespan).date();
+            const taskMonth = dayjs.unix(value.timespan).month();
+            const taskYear = dayjs.unix(value.timespan).year();
+            if(date?.date() === taskDay && date?.month() === taskMonth && date?.year() === taskYear) {
+                newTaskList = {...newTaskList, [key]: value};
+            };
+        });
+        return newTaskList;
+    };
+
+    const changeDate = function(newDate: Dayjs | null) {
+        setDate(newDate);
+        setIsShowAllTask(false);
+    };
+
     useEffect(() => {
         getHighlightedDays();
     }, [date]);
@@ -49,9 +76,9 @@ const TabPanelCalender: React.FC = function() {
             <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DateCalendar
                     value={date}
-                    onChange={(newDate) => setDate(newDate)}
-                    onMonthChange={(newDate) => setDate(newDate)}
-                    onYearChange={(newDate) => setDate(newDate)}
+                    onChange={changeDate}
+                    onMonthChange={changeDate}
+                    onYearChange={changeDate}
                     slots={{
                         day: ServerDay,
                     }}
@@ -60,8 +87,15 @@ const TabPanelCalender: React.FC = function() {
                     }}
                 />
             </LocalizationProvider>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <Typography variant="h5" sx={{ mb: 4 }}>
+                    {isShowAllTask ? "All tasks" :`Task for ${dayjs(date).format("DD.MM.YYYY")}`}
+                </Typography>
+                <Button onClick={() => setIsShowAllTask(true)} variant="contained">See all tasks</Button>
+            </Box>
             <Grid container spacing={2}>
-                {Object.entries(taskList).map(([key, value]) => {
+                {Object.keys(showTaskListByDay()).length ?
+                Object.entries(isShowAllTask ? taskList :showTaskListByDay()).map(([key, value]) => {
                     const taskDate = dayjs.unix(value.timespan).format("DD.MM.YYYY");
                     return (
                         <Grid item xs={6} key={key}>
@@ -81,7 +115,8 @@ const TabPanelCalender: React.FC = function() {
                             </Card>
                         </Grid>
                     );
-                })}
+                }) :
+                <Typography variant="body2" color="text.secondary" sx={{ m: "0 auto" }}>There are no tasks</Typography>}
             </Grid>
         </Box>
     );
