@@ -13,8 +13,12 @@ const getUserTasks = createAsyncThunk(
             } else {
                 throw new Error("No data available");
             };
-        } catch (error) {
-            return thunkAPI.rejectWithValue(error);
+        } catch (error: any) {
+            if(error instanceof Error) {
+                return thunkAPI.rejectWithValue(`Error message: ${error.message}`);
+            } else {
+                return thunkAPI.rejectWithValue('An unknown error has occurred');
+            };
         };
     },
 );
@@ -24,7 +28,6 @@ interface oneTask {
     details: string,
     timespan: number,
 };
-
 
 interface setParam {
     newUserTasks: {
@@ -39,9 +42,13 @@ const setUserTask = createAsyncThunk(
         try {
             const db = getDatabase(firebaseApp);
             await set(ref(db, `${userUID}/`), newUserTasks);
-            
-        } catch (error) {
-            return thunkAPI.rejectWithValue(error);
+            thunkAPI.dispatch(getUserTasks(userUID));
+        } catch (error: any) {
+            if(error instanceof Error) {
+                return thunkAPI.rejectWithValue(`Error message: ${error.message}`);
+            } else {
+                return thunkAPI.rejectWithValue('An unknown error has occurred');
+            };
         };
     },
 );
@@ -61,13 +68,7 @@ const initialState: taskInterface = {
         taskErrorStatus: false,
         taskErrorMessage: "",
     },
-    taskList: {
-        "0": {
-            title: "",
-            details: "",
-            timespan: 0
-        },
-    },
+    taskList: {},
 };
 
 const taskSlice = createSlice({

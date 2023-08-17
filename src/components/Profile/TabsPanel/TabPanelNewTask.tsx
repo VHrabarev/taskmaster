@@ -25,7 +25,7 @@ const TabPanelNewTask: React.FC = function() {
                 details: taskDetailsRef.current?.value,
             }, 
         };
-        dispatch(setUserTask({newUserTasks, userUID}))
+        dispatch(setUserTask({newUserTasks, userUID}));
     };
 
     return (

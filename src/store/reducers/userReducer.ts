@@ -14,8 +14,12 @@ const userCreate = createAsyncThunk(
             const auth = getAuth(firebaseApp);
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             return userCredential.user;
-        } catch (error) {
-            return thunkAPI.rejectWithValue(error);
+        } catch (error: any) {
+            if(error instanceof Error) {
+                return thunkAPI.rejectWithValue(`Error message: ${error.message}`);
+            } else {
+                return thunkAPI.rejectWithValue('An unknown error has occurred');
+            };
         };
     },
 );
@@ -28,8 +32,12 @@ const userLogin = createAsyncThunk(
             await setPersistence(auth, browserLocalPersistence);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             return userCredential.user;
-        } catch (error) {
-            return thunkAPI.rejectWithValue(error);
+        } catch (error: any) {
+            if(error instanceof Error) {
+                return thunkAPI.rejectWithValue(`Error message: ${error.message}`);
+            } else {
+                return thunkAPI.rejectWithValue('An unknown error has occurred');
+            };
         };
     },
 );
@@ -52,8 +60,12 @@ const userUpdateProfile = createAsyncThunk(
                 await updateEmail(auth.currentUser, email);
                 thunkAPI.dispatch(checkUserStatus({loginStatus, fullName, email, avatarUrl, userUID}));
             }
-        } catch (error) {
-            return thunkAPI.rejectWithValue(error);
+        } catch (error: any) {
+            if(error instanceof Error) {
+                return thunkAPI.rejectWithValue(`Error message: ${error.message}`);
+            } else {
+                return thunkAPI.rejectWithValue('An unknown error has occurred');
+            };
         };
     },
 );

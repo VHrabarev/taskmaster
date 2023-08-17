@@ -1,4 +1,4 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, getDefaultMiddleware } from "@reduxjs/toolkit";
 import userReducer from "./reducers/userReducer";
 import taskReducer from "./reducers/taskReducer";
 
@@ -7,6 +7,9 @@ const store = configureStore({
         user: userReducer,
         task: taskReducer,
     },
+    middleware: getDefaultMiddleware({
+        serializableCheck: false,
+    }),
 });
 
 console.log(store.getState());
