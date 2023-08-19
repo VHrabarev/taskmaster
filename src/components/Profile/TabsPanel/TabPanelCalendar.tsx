@@ -109,8 +109,7 @@ const TabPanelCalender: React.FC = function() {
                 <Button onClick={() => setIsShowAllTask(true)} variant="contained">See all tasks</Button>
             </Box>
             <Grid container spacing={2}>
-                {Object.keys(showTaskListByDay()).length ?
-                Object.entries(isShowAllTask ? taskList : showTaskListByDay()).map(([key, value]) => {
+                {Object.entries(isShowAllTask ? taskList : showTaskListByDay()).map(([key, value]) => {
                     const taskDate = dayjs.unix(value.timespan).format("DD.MM.YYYY");
                     return (
                         <Grid item xs={6} key={key}>
@@ -130,9 +129,9 @@ const TabPanelCalender: React.FC = function() {
                             </Card>
                         </Grid>
                     );
-                }) :
-                <Typography variant="body2" color="text.secondary" sx={{ m: "0 auto" }}>There are no tasks</Typography>}
+                })}
             </Grid>
+            {!Object.keys(showTaskListByDay()).length && <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center" }}>There are no tasks here</Typography>}
         </Box>
     );
 };
