@@ -20,7 +20,7 @@ const TabPanelNewTask: React.FC = function() {
         const newUserTasks = {
             ...taskList,
             [Date.now()]: {
-                title: taskDetailsRef.current?.value,
+                title: taskTitleRef.current?.value,
                 timespan: date?.add(time?.hour() || 0, "hour").add(time?.minute() || 0, "minute").unix(),
                 details: taskDetailsRef.current?.value,
             }, 

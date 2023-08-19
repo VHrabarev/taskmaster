@@ -6,6 +6,7 @@ import { useAppSelector, useAppDispatch } from "../../../hook";
 import React, { useState, useEffect } from "react";
 import dayjs, { Dayjs } from 'dayjs';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { setUserTask } from "../../../store/reducers/taskReducer";
 
 interface taskListType {
     [key: string]: {
@@ -17,9 +18,11 @@ interface taskListType {
 
 const TabPanelCalender: React.FC = function() {
     const [date, setDate] = useState<Dayjs | null>(dayjs());
-    const [isShowAllTask, setIsShowAllTask] = useState<boolean>();
+    const [isShowAllTask, setIsShowAllTask] = useState<boolean>(false);
     const taskList = useAppSelector(store => store.task.taskList);
+    const userUID = useAppSelector(store => store.user.userInfo.userUID);
     const [highlightedDays, setHighlightedDays] = useState<number[]>([]);
+    const dispatch = useAppDispatch();
 
     const ServerDay = function(props: PickersDayProps<Dayjs> & { highlightedDays?: number[] }) {
         const { highlightedDays = [], day, outsideCurrentMonth, ...other } = props;
@@ -66,6 +69,18 @@ const TabPanelCalender: React.FC = function() {
         setIsShowAllTask(false);
     };
 
+    const deleteTaskByKey = function(key: string) {
+        let newTasksList: taskListType = {};
+
+        Object.entries(taskList).map(([taskKey, value]) => {
+            if(taskKey !== key) {
+                newTasksList = {...newTasksList, [taskKey]: value};
+            };
+        });
+
+        dispatch(setUserTask({newUserTasks: newTasksList, userUID}));
+    };
+
     useEffect(() => {
         getHighlightedDays();
     }, [date]);
@@ -95,7 +110,7 @@ const TabPanelCalender: React.FC = function() {
             </Box>
             <Grid container spacing={2}>
                 {Object.keys(showTaskListByDay()).length ?
-                Object.entries(isShowAllTask ? taskList :showTaskListByDay()).map(([key, value]) => {
+                Object.entries(isShowAllTask ? taskList : showTaskListByDay()).map(([key, value]) => {
                     const taskDate = dayjs.unix(value.timespan).format("DD.MM.YYYY");
                     return (
                         <Grid item xs={6} key={key}>
@@ -108,7 +123,7 @@ const TabPanelCalender: React.FC = function() {
                                     <Typography variant="body2" color="text.secondary">{value.details}</Typography>
                                 </CardContent>
                                 <CardActions disableSpacing>
-                                    <IconButton aria-label="Delete task">
+                                    <IconButton onClick={() => deleteTaskByKey(key)} aria-label="Delete task">
                                         <DeleteIcon />
                                     </IconButton>
                                 </CardActions>
