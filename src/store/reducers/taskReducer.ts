@@ -2,6 +2,29 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getDatabase, ref, child, get, set } from "firebase/database";
 import firebaseApp from '../../api/firebase';
 
+interface oneTask {
+    title: string,
+    details: string,
+    timespan: number,
+};
+
+interface setParam {
+    newUserTasks: {
+        [key: string]: oneTask,
+    },
+    userUID: string,
+};
+
+interface taskInterface {
+    getUserTask: {
+        taskErrorStatus: boolean,
+        taskErrorMessage: string,
+    },
+    taskList: {
+        [key: string]: oneTask,
+    },
+};
+
 const getUserTasks = createAsyncThunk(
     "task/getUserTasks",
     async (userUID: string, thunkAPI) => {
@@ -23,19 +46,6 @@ const getUserTasks = createAsyncThunk(
     },
 );
 
-interface oneTask {
-    title: string,
-    details: string,
-    timespan: number,
-};
-
-interface setParam {
-    newUserTasks: {
-        [key: string]: oneTask,
-    },
-    userUID: string,
-};
-
 const setUserTask = createAsyncThunk(
     "task/setUserTask",
     async ({newUserTasks, userUID}: setParam, thunkAPI) => {
@@ -52,16 +62,6 @@ const setUserTask = createAsyncThunk(
         };
     },
 );
-
-interface taskInterface {
-    getUserTask: {
-        taskErrorStatus: boolean,
-        taskErrorMessage: string,
-    },
-    taskList: {
-        [key: string]: oneTask,
-    },
-};
 
 const initialState: taskInterface = {
     getUserTask: {
