@@ -1,4 +1,4 @@
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, signOut, updateProfile, updateEmail, updatePassword } from "firebase/auth";
+import { GoogleAuthProvider, getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, setPersistence, browserLocalPersistence, signOut, updateProfile, updateEmail, updatePassword, signInWithPopup } from "firebase/auth";
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import firebaseApp from '../../api/firebase';
 
@@ -16,23 +16,17 @@ interface userInfo {
 };
 
 interface registrationState {
-    userRegistration: {
-        registrationError: boolean,
-        registrationErrorMessage: string | undefined,
-    },
-    userLogin: {
-        loginError: boolean,
-        loginErrorMessage: string | undefined,
-    },
     userInfo: userInfo,
-    userUpdateProfile: {
-        updateError: boolean,
-        updateErrorMessage: string | undefined,
+    error: {
+        status: boolean,
+        name: string,
+        message: string,
     },
-    userUpdatePassword: {
-        updateError: boolean,
-        updateErrorMessage: string | undefined,
-    },
+};
+
+interface payloadActionError {
+    name: string,
+    message: string,
 };
 
 const userCreate = createAsyncThunk(
@@ -43,11 +37,12 @@ const userCreate = createAsyncThunk(
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             return userCredential.user;
         } catch (error: any) {
+            const payloadError: payloadActionError = {name: "Error", message: "An unknown error has occurred"}
             if(error instanceof Error) {
-                return thunkAPI.rejectWithValue(error.message);
-            } else {
-                return thunkAPI.rejectWithValue('An unknown error has occurred');
+                payloadError.name = error.name;
+                payloadError.message = error.message;
             };
+            return thunkAPI.rejectWithValue(payloadError);
         };
     },
 );
@@ -61,11 +56,12 @@ const userLogin = createAsyncThunk(
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             return userCredential.user;
         } catch (error: any) {
+            const payloadError: payloadActionError = {name: "Error", message: "An unknown error has occurred"}
             if(error instanceof Error) {
-                return thunkAPI.rejectWithValue(error.message);
-            } else {
-                return thunkAPI.rejectWithValue('An unknown error has occurred');
+                payloadError.name = error.name;
+                payloadError.message = error.message;
             };
+            return thunkAPI.rejectWithValue(payloadError);
         };
     },
 );
@@ -81,11 +77,12 @@ const userUpdateProfile = createAsyncThunk(
                 thunkAPI.dispatch(checkUserStatus({loginStatus, fullName, email, avatarUrl, userUID}));
             }
         } catch (error: any) {
+            const payloadError: payloadActionError = {name: "Error", message: "An unknown error has occurred"}
             if(error instanceof Error) {
-                return thunkAPI.rejectWithValue(error.message);
-            } else {
-                return thunkAPI.rejectWithValue('An unknown error has occurred');
+                payloadError.name = error.name;
+                payloadError.message = error.message;
             };
+            return thunkAPI.rejectWithValue(payloadError);
         };
     },
 );
@@ -101,11 +98,12 @@ const userUpdatePassword = createAsyncThunk(
                 throw new Error("User is not signed-in");
             };
         } catch (error: any) {
+            const payloadError: payloadActionError = {name: "Error", message: "An unknown error has occurred"}
             if(error instanceof Error) {
-                return thunkAPI.rejectWithValue(error.message);
-            } else {
-                return thunkAPI.rejectWithValue('An unknown error has occurred');
+                payloadError.name = error.name;
+                payloadError.message = error.message;
             };
+            return thunkAPI.rejectWithValue(payloadError);
         };
     },
 );
@@ -118,15 +116,29 @@ const userLogout = createAsyncThunk(
     },
 );
 
+const userCreateWithGoogle = createAsyncThunk(
+    "user/userCreateWithGoogle",
+    async (_, thunkAPI) => {
+        const auth = getAuth(firebaseApp);
+        const provider = new GoogleAuthProvider();
+        try {
+            const result = await signInWithPopup(auth, provider);
+            if(result) {
+                const user = result.user;
+                return user;
+            }
+        } catch (error: any) {
+            const payloadError: payloadActionError = {name: "Error", message: "An unknown error has occurred"}
+            if(error instanceof Error) {
+                payloadError.name = error.name;
+                payloadError.message = error.message;
+            };
+            return thunkAPI.rejectWithValue(payloadError);
+        };
+    },
+);
+
 const initialState: registrationState = {
-    userRegistration: {
-        registrationError: false,
-        registrationErrorMessage: "",
-    },
-    userLogin: {
-        loginError: false,
-        loginErrorMessage: "",
-    },
     userInfo: {
         loginStatus: false,
         fullName: null,
@@ -134,13 +146,10 @@ const initialState: registrationState = {
         avatarUrl: null,
         userUID: "",
     },
-    userUpdateProfile: {
-        updateError: false,
-        updateErrorMessage: "",
-    },
-    userUpdatePassword: {
-        updateError: false,
-        updateErrorMessage: "",
+    error: {
+        status: false,
+        name: "",
+        message: "",
     },
 };
 
@@ -159,26 +168,40 @@ const userSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder.addCase(userCreate.fulfilled, (store) => {
-            store.userRegistration.registrationError = false;
-            store.userRegistration.registrationErrorMessage = "";
+            store.error.status = false;
+            store.error.name ="";
+            store.error.message = "";
         });
         builder.addCase(userCreate.pending, (store) => {
-            
+            store.error.status = false;
+            store.error.name ="";
+            store.error.message = "";
         });
         builder.addCase(userCreate.rejected, (store, action) => {
-            store.userRegistration.registrationError = true;
-            store.userRegistration.registrationErrorMessage = action.error.message;
+            const payload = action.payload as payloadActionError;
+            if (payload) {
+                store.error.status = true;
+                store.error.name = payload.name;
+                store.error.message = payload.message;
+            };
         });
         builder.addCase(userLogin.fulfilled, (store) => {
-            store.userLogin.loginError = false;
-            store.userLogin.loginErrorMessage = "";
+            store.error.status = false;
+            store.error.name ="";
+            store.error.message = "";
         });
         builder.addCase(userLogin.pending, (store) => {
-            
+            store.error.status = false;
+            store.error.name ="";
+            store.error.message = "";
         });
         builder.addCase(userLogin.rejected, (store, action) => {
-            store.userLogin.loginError = true;
-            store.userLogin.loginErrorMessage = action.error.message;
+            const payload = action.payload as payloadActionError;
+            if (payload) {
+                store.error.status = true;
+                store.error.name = payload.name;
+                store.error.message = payload.message;
+            };
         });
         builder.addCase(userLogout.fulfilled, (store) => {
             store.userInfo.loginStatus = false;
@@ -187,26 +210,40 @@ const userSlice = createSlice({
             store.userInfo.avatarUrl = null;
         });
         builder.addCase(userUpdateProfile.fulfilled, (store) => {
-            store.userUpdateProfile.updateError = false;
-            store.userUpdateProfile.updateErrorMessage = "";
+            store.error.status = false;
+            store.error.name ="";
+            store.error.message = "";
         });
         builder.addCase(userUpdateProfile.pending, (store) => {
-            
+            store.error.status = false;
+            store.error.name ="";
+            store.error.message = "";
         });
         builder.addCase(userUpdateProfile.rejected, (store, action) => {
-            store.userUpdateProfile.updateError = true;
-            store.userUpdateProfile.updateErrorMessage = action.error.message;
+            const payload = action.payload as payloadActionError;
+            if (payload) {
+                store.error.status = true;
+                store.error.name = payload.name;
+                store.error.message = payload.message;
+            };
         });
         builder.addCase(userUpdatePassword.fulfilled, (store) => {
-            store.userUpdatePassword.updateError = false;
-            store.userUpdatePassword.updateErrorMessage = "";
+            store.error.status = false;
+            store.error.name ="";
+            store.error.message = "";
         });
         builder.addCase(userUpdatePassword.pending, (store) => {
-            
+            store.error.status = false;
+            store.error.name ="";
+            store.error.message = "";
         });
-        builder.addCase(userUpdatePassword.rejected, (store, action: any) => {
-            store.userUpdatePassword.updateError = true;
-            store.userUpdatePassword.updateErrorMessage = action.payload;
+        builder.addCase(userUpdatePassword.rejected, (store, action) => {
+            const payload = action.payload as payloadActionError;
+            if (payload) {
+                store.error.status = true;
+                store.error.name = payload.name;
+                store.error.message = payload.message;
+            };
         });
     },
 });
@@ -214,4 +251,4 @@ const userSlice = createSlice({
 const {checkUserStatus} = userSlice.actions;
 
 export default userSlice.reducer;
-export {userCreate, userLogin, checkUserStatus, userLogout, userUpdateProfile, userUpdatePassword};
+export {userCreate, userLogin, checkUserStatus, userLogout, userUpdateProfile, userUpdatePassword, userCreateWithGoogle};

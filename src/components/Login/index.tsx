@@ -1,13 +1,14 @@
-import { Box, Typography, TextField, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton, Button, Divider } from '@mui/material';
+import { Box, Typography, TextField, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton, Button, Divider, FormHelperText } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import React, { FormEvent, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppDispatch } from '../../hook';
-import { userLogin } from '../../store/reducers/userReducer';
+import { userLogin, userCreateWithGoogle } from '../../store/reducers/userReducer';
 
 const Login: React.FC = function() {
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState({email: false, password: false});
     const dispatch = useAppDispatch();
     const email = useRef<HTMLInputElement>();
     const password = useRef<HTMLInputElement>();
@@ -16,8 +17,9 @@ const Login: React.FC = function() {
         event.preventDefault();
         if(email.current?.value && password.current?.value) {
             dispatch(userLogin({email: email.current?.value, password: password.current?.value}));
+            setError({email: false, password: false});
         } else {
-            console.log("Нет данных");
+            setError({email: !email.current?.value, password: !password.current?.value});
         };
     };
 
@@ -51,16 +53,27 @@ const Login: React.FC = function() {
                 sx={{ display: "flex", flexDirection: "column" }}
             >
                 <Typography component="h3" variant='h4' sx={{ mb: 2 }}>Welcome Back!</Typography>
-                <TextField label="Email" variant="outlined" sx={{ mb: 2 }} type='email' inputRef={email} autoFocus />
+                <TextField
+                    label="Email"
+                    variant="outlined"
+                    sx={{ mb: 2 }}
+                    type='email'
+                    inputRef={email}
+                    error={error.email}
+                    helperText={error.email ? "The field must not be empty" : ""}
+                    autoFocus
+                />
                 <FormControl variant="outlined" sx={{ mb: 1 }}>
-                    <InputLabel htmlFor="password">Password</InputLabel>
+                    <InputLabel htmlFor="password" sx={{color: error.password ? "#d32f2f" : "#7b7171"}}>Password</InputLabel>
                     <OutlinedInput
                         id="password"
                         type={showPassword ? 'text' : 'password'}
                         endAdornment={passwordEndAdornment}
                         label="Password"
                         inputRef={password}
+                        error={error.password}
                     />
+                    {error.password && <FormHelperText sx={{color: "#d32f2f"}}>The field must not be empty</FormHelperText>}
                 </FormControl>
                 <Link to="forgot-password" style={{ color: "inherit", textDecoration: "none", textAlign: "right", marginBottom: 20 }}>
                     <Typography className="opacityBrightly">Forgot Password?</Typography>
@@ -69,7 +82,7 @@ const Login: React.FC = function() {
                 <Divider role="presentation" sx={{ mb: 2 }}>
                     <Typography sx={{ opacity: 0.6 }}>Or continue with</Typography>
                 </Divider>
-                <Button variant="outlined" sx={{ mb: 2 }}>Google</Button>
+                <Button onClick={() => dispatch(userCreateWithGoogle())} variant="outlined" sx={{ mb: 2 }}>Google</Button>
                 <Box sx={{ display: "flex", justifyContent: "center" }}>
                     <Typography variant='body2' sx={{ opacity: 0.6, mr: 1 }}>Don’t have an account?</Typography>
                     <Link to="/registration" style={{ color: "#1976d2", textDecoration: "none" }}>

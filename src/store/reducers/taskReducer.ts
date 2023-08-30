@@ -16,13 +16,19 @@ interface setParam {
 };
 
 interface taskInterface {
-    getUserTask: {
-        taskErrorStatus: boolean,
-        taskErrorMessage: string,
-    },
     taskList: {
         [key: string]: oneTask,
     },
+    error: {
+        status: boolean,
+        name: string,
+        message: string,
+    },
+};
+
+interface payloadActionError {
+    name: string,
+    message: string,
 };
 
 const getUserTasks = createAsyncThunk(
@@ -37,11 +43,12 @@ const getUserTasks = createAsyncThunk(
                 throw new Error("No data available");
             };
         } catch (error: any) {
+            const payloadError: payloadActionError = {name: "Error", message: "An unknown error has occurred"}
             if(error instanceof Error) {
-                return thunkAPI.rejectWithValue(`Error message: ${error.message}`);
-            } else {
-                return thunkAPI.rejectWithValue('An unknown error has occurred');
+                payloadError.name = error.name;
+                payloadError.message = error.message;
             };
+            return thunkAPI.rejectWithValue(payloadError);
         };
     },
 );
@@ -54,21 +61,23 @@ const setUserTask = createAsyncThunk(
             await set(ref(db, `${userUID}/`), newUserTasks);
             thunkAPI.dispatch(getUserTasks(userUID));
         } catch (error: any) {
+            const payloadError: payloadActionError = {name: "Error", message: "An unknown error has occurred"}
             if(error instanceof Error) {
-                return thunkAPI.rejectWithValue(`Error message: ${error.message}`);
-            } else {
-                return thunkAPI.rejectWithValue('An unknown error has occurred');
+                payloadError.name = error.name;
+                payloadError.message = error.message;
             };
+            return thunkAPI.rejectWithValue(payloadError);
         };
     },
 );
 
 const initialState: taskInterface = {
-    getUserTask: {
-        taskErrorStatus: false,
-        taskErrorMessage: "",
-    },
     taskList: {},
+    error: {
+        status: false,
+        name: "",
+        message: "",
+    },
 };
 
 const taskSlice = createSlice({
@@ -77,9 +86,23 @@ const taskSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder.addCase(getUserTasks.fulfilled, (store, action) => {
-            store.getUserTask.taskErrorStatus = false;
-            store.getUserTask.taskErrorMessage = "";
             store.taskList = action.payload;
+            store.error.status = false;
+            store.error.name = "";
+            store.error.message = "";
+        });
+        builder.addCase(getUserTasks.pending, (store) => {
+            store.error.status = false;
+            store.error.name = "";
+            store.error.message = "";
+        });
+        builder.addCase(getUserTasks.rejected, (store, action) => {
+            const payload = action.payload as payloadActionError;
+            if (payload) {
+                store.error.status = true;
+                store.error.name = payload.name;
+                store.error.message = payload.message;
+            };
         });
     },
 });
