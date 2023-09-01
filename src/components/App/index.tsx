@@ -39,7 +39,7 @@ const App: React.FC = function() {
     };
     window.addEventListener("resize", () => handleResize);
     return window.removeEventListener("resize", () => handleResize);
-  } ,[userUID]);
+  }, [userUID]);
 
   useEffect(() => setAlertShown(status), [status]);
 

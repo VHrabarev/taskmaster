@@ -1,4 +1,4 @@
-import { Box, Typography, TextField, Button } from "@mui/material";
+import { Box, Typography, TextField, Button, FormHelperText } from "@mui/material";
 import React, { FormEvent, useState, useRef } from "react";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker, TimePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -9,6 +9,7 @@ import { setUserTask } from "../../../store/reducers/taskReducer";
 const TabPanelNewTask: React.FC = function() {
     const [date, setDate] = useState<Dayjs | null>(null);
     const [time, setTime] = useState<Dayjs | null>(null);
+    const [error, setError] = useState<boolean>(false);
     const taskTitleRef = useRef<HTMLInputElement>();
     const taskDetailsRef = useRef<HTMLInputElement>();
     const userUID = useAppSelector(store => store.user.userInfo.userUID);
@@ -17,15 +18,20 @@ const TabPanelNewTask: React.FC = function() {
 
     const onSubmitCreateNewTask = function(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const newUserTasks = {
-            ...taskList,
-            [Date.now()]: {
-                title: taskTitleRef.current?.value,
-                timespan: date?.add(time?.hour() || 0, "hour").add(time?.minute() || 0, "minute").unix(),
-                details: taskDetailsRef.current?.value,
-            }, 
+        if(date && time && taskTitleRef.current?.value && taskDetailsRef.current?.value) {
+            const newUserTasks = {
+                ...taskList,
+                [Date.now()]: {
+                    title: taskTitleRef.current?.value,
+                    timespan: date?.add(time?.hour() || 0, "hour").add(time?.minute() || 0, "minute").unix(),
+                    details: taskDetailsRef.current?.value,
+                }, 
+            };
+            dispatch(setUserTask({newUserTasks, userUID}));
+            setError(false);
+        } else {
+            setError(true);
         };
-        dispatch(setUserTask({newUserTasks, userUID}));
     };
 
     return (
@@ -40,6 +46,7 @@ const TabPanelNewTask: React.FC = function() {
                     </LocalizationProvider>
                 </Box>
                 <TextField inputRef={taskDetailsRef} label="Details" multiline rows={4} sx={{ width: "100%", mb: 2 }} />
+                {error && <FormHelperText sx={{color: "#d32f2f", mb: 1}}>The field must not be empty</FormHelperText>}
                 <Button variant="contained" type="submit">Create</Button>
             </Box>
         </Box>
